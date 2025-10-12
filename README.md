@@ -1,6 +1,6 @@
 # Algorithm Visualizer 😎✨
 
-![Banner](https://user-images.githubusercontent.com/yourusername/banner.png)
+![Banner](assets/banner.png)
 
 Minimal , extensible Python Algorithm Visualizer with small demos and a Streamlit web UI.
 
@@ -30,6 +30,7 @@ This repository contains simple algorithm implementations (sorting, search, path
 ## Quick Start ⚡
 
 ### Create and activate a virtualenv:
+
 ```bash
 python -m venv .venv
 # Windows
@@ -39,11 +40,13 @@ source .venv/bin/activate
 ```
 
 ### Install dependencies:
+
 ```bash
 pip install -r requirements.txt
 ```
 
 ### Run Streamlit visualizer:
+
 ```bash
 streamlit run web_app.py
 ```
@@ -55,11 +58,12 @@ streamlit run web_app.py
   - Adjust playback speed (multiplier persists across runs)
 
 ### Run CLI demo (non-Streamlit):
+
 ```bash
 python examples/run_sort_demo.py
 ```
 
-> 💡 *Optional:* Add an image of your web UI here to show off your Streamlit interface!
+> 💡 _Optional:_ Add an image of your web UI here to show off your Streamlit interface!
 
 ---
 
@@ -90,6 +94,7 @@ python examples/run_sort_demo.py
 ## Development Notes 🧩
 
 Each algorithm yields frames as dictionaries:
+
 ```python
 {
     'state': [5, 2, 4, 1, 3],
@@ -103,6 +108,7 @@ Streamlit (`web_app.py`) renders these frames as bar charts. Playback speed uses
 ---
 
 ## Testing ✅
+
 ```bash
 python -m pytest -q
 ```
@@ -132,4 +138,3 @@ This project is open source. See `LICENSE` for details.
 - Open an issue or PR if you want help adding an algorithm or improving the UI.
 
 Enjoy exploring algorithms! 🚀
-
