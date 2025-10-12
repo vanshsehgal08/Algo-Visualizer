@@ -1,4 +1,4 @@
-# Algorithm Visualizer 😎✨
+# Algorithm Visualizer 😎✨✨
 
 ![Banner](assets/banner.png)
 
