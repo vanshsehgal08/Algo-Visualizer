@@ -56,20 +56,43 @@ st.title("Algorithm Visualizer — Web Demo")
 # Sidebar controls
 with st.sidebar:
     st.header("Controls")
-    algo_name = st.selectbox("Algorithm", list(ALGOS.keys()) + ["Binary Search"])
-    st.markdown("**Array input (required)**")
-    arr_text = st.text_input("Enter numbers separated by commas", "5,2,4,1,3")
-    # Derive array strictly from user input (no randomization)
+    
+    # Form for array input and visualization trigger
+    with st.form("visualization_form"):
+        algo_name = st.selectbox("Algorithm", list(ALGOS.keys()) + ["Binary Search"])
+        st.markdown("**Array input (required)**")
+        arr_text = st.text_input("Enter numbers separated by commas", "5,2,4,1,3")
+        
+        if algo_name == "Binary Search":
+            target = st.number_input("Target value", value=5)
+        
+        submitted = st.form_submit_button("Visualize!")
+        
+        # Process form submission
+        if submitted:
+            # Derive array strictly from user input (no randomization)
+            try:
+                arr = [int(x.strip()) for x in arr_text.split(",") if x.strip()!='']
+                if not arr:
+                    st.error("Please enter at least one number")
+                else:
+                    # Build frames list from generator so we can step/play
+                    if algo_name == "Binary Search":
+                        st.session_state.frames = list(binary_search(sorted(arr), int(target)))
+                    else:
+                        st.session_state.frames = list(ALGOS[algo_name](arr))
+                    st.session_state.idx = 0
+                    st.session_state.playing = False
+                    st.success(f"Generated {len(st.session_state.frames)} frames!")
+            except Exception:
+                st.error("Invalid array - use comma separated integers")
+    
+    # Display array info outside form
     try:
         arr = [int(x.strip()) for x in arr_text.split(",") if x.strip()!='']
+        st.write(f"Array size: {len(arr)}")
     except Exception:
-        st.error("Invalid array - use comma separated integers")
-        arr = []
-    # keep UI simple: array size is derived from number of inputs
-    st.write(f"Array size: {len(arr)}")
-
-    if algo_name == "Binary Search":
-        target = st.number_input("Target value", value=arr[0] if arr else 0)
+        st.write("Array size: 0")
 
     # Speed control: smooth slider for intuitive speed adjustment
     base_delay_ms = 1000  # Base delay in milliseconds (1 second)
@@ -84,19 +107,6 @@ with st.sidebar:
         st.session_state.frames = []
     if 'idx' not in st.session_state:
         st.session_state.idx = 0
-
-    if st.button("Generate frames"):
-        # Build frames list from generator so we can step/play
-        if not arr:
-            st.warning("Provide a valid array first.")
-            st.session_state.frames = []
-        else:
-            if algo_name == "Binary Search":
-                st.session_state.frames = list(binary_search(sorted(arr), int(target)))
-            else:
-                st.session_state.frames = list(ALGOS[algo_name](arr))
-        st.session_state.idx = 0
-        st.session_state.playing = False
 
     # Clean play/pause/step buttons
     c1, c2, c3 = st.columns([1,1,1])
