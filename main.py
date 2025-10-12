@@ -122,13 +122,13 @@ with st.sidebar:
     # Clean play/pause/step buttons
     c1, c2, c3 = st.columns([1,1,1])
     with c1:
-        if st.button("Play ▶"):
+        if st.button("Play "):
             st.session_state.playing = True
     with c2:
-        if st.button("Pause ⏸"):
+        if st.button("Pause "):
             st.session_state.playing = False
     with c3:
-        if st.button("Step ⏭"):
+        if st.button("Step "):
             st.session_state.playing = False
             st.session_state.idx = min(st.session_state.idx + 1, max(len(st.session_state.frames) - 1, 0))
 
