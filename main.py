@@ -34,7 +34,7 @@ def draw_state_fig(state, highlight=(), info=""):
         if highlight:
             for idx in (highlight if isinstance(highlight, (list, tuple)) else [highlight]):
                 if isinstance(idx, int) and 0 <= idx < len(bars):
-                    bars[idx].set_color('#ff7f0e')
+                    bars[idx].set_color('#ee994f')
         ax.set_xlabel('Index')
         ax.set_ylabel('Value')
         ax.set_xticks(range(len(state)))
@@ -71,11 +71,32 @@ with st.sidebar:
     if algo_name == "Binary Search":
         target = st.number_input("Target value", value=arr[0] if arr else 0)
 
-    # Speed control: smooth slider for intuitive speed adjustment
-    base_delay_ms = 1000  # Base delay in milliseconds (1 second)
-    speed = st.slider("Animation Speed", min_value=1, max_value=10, value=5, 
-                      help="1 = slowest, 10 = fastest")
-    st.write(f"Speed: {speed}x")
+    # Speed control: base delay (ms) controls baseline speed; multiplier increases playback speed
+    base_delay_ms = 100
+    # persistent multiplier stored in session_state so changes persist across re-runs
+    if 'multiplier' not in st.session_state:
+        st.session_state.multiplier = 2
+
+    col_a, col_b, col_c = st.columns([1,1,2])
+    with col_a:
+        if st.button("Speed -"):
+            # halve the multiplier but keep at least 1
+            st.session_state.multiplier = max(1, st.session_state.multiplier // 2)
+    with col_b:
+        if st.button("Speed +"):
+            # double the multiplier each click (user requested "increase speed more, every time I select")
+            st.session_state.multiplier = st.session_state.multiplier * 4
+    with col_c:
+        st.write("Current multiplier:", f"{st.session_state.multiplier}x")
+
+    # provide a quick presets row for convenience
+    preset_cols = st.columns([1,1,1,1])
+    presets = [1,2,4,8]
+    for pc, val in zip(preset_cols, presets):
+        with pc:
+            if st.button(f"{val}x"):
+                st.session_state.multiplier = val
+    multiplier = st.session_state.multiplier
     st.markdown("---")
     st.write("Playback")
     if 'playing' not in st.session_state:
@@ -101,13 +122,13 @@ with st.sidebar:
     # Clean play/pause/step buttons
     c1, c2, c3 = st.columns([1,1,1])
     with c1:
-        if st.button("Play "):
+        if st.button("Play ▶️"):
             st.session_state.playing = True
     with c2:
-        if st.button("Pause "):
+        if st.button("Pause ⏸️"):
             st.session_state.playing = False
     with c3:
-        if st.button("Step "):
+        if st.button("Step ⏭️"):
             st.session_state.playing = False
             st.session_state.idx = min(st.session_state.idx + 1, max(len(st.session_state.frames) - 1, 0))
 
