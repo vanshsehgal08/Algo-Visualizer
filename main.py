@@ -71,32 +71,11 @@ with st.sidebar:
     if algo_name == "Binary Search":
         target = st.number_input("Target value", value=arr[0] if arr else 0)
 
-    # Speed control: base delay (ms) controls baseline speed; multiplier increases playback speed
-    base_delay_ms = 160
-    # persistent multiplier stored in session_state so changes persist across re-runs
-    if 'multiplier' not in st.session_state:
-        st.session_state.multiplier = 2
-
-    col_a, col_b, col_c = st.columns([1,1,2])
-    with col_a:
-        if st.button("Speed -"):
-            # halve the multiplier but keep at least 1
-            st.session_state.multiplier = max(1, st.session_state.multiplier // 2)
-    with col_b:
-        if st.button("Speed +"):
-            # double the multiplier each click (user requested "increase speed more, every time I select")
-            st.session_state.multiplier = st.session_state.multiplier * 4
-    with col_c:
-        st.write("Current multiplier:", f"{st.session_state.multiplier}x")
-
-    # provide a quick presets row for convenience
-    preset_cols = st.columns([1,1,1,1])
-    presets = [1,2,4,8]
-    for pc, val in zip(preset_cols, presets):
-        with pc:
-            if st.button(f"{val}x"):
-                st.session_state.multiplier = val
-    multiplier = st.session_state.multiplier
+    # Speed control: smooth slider for intuitive speed adjustment
+    base_delay_ms = 1000  # Base delay in milliseconds (1 second)
+    speed = st.slider("Animation Speed", min_value=1, max_value=10, value=5, 
+                      help="1 = slowest, 10 = fastest")
+    st.write(f"Speed: {speed}x")
     st.markdown("---")
     st.write("Playback")
     if 'playing' not in st.session_state:
@@ -156,8 +135,8 @@ if st.session_state.frames:
 # Note: this is a simple approach that does not support pausing mid-block reliably
 # because Streamlit processes events between runs. It still provides Start/Stop/Step.
 if st.session_state.playing and st.session_state.frames:
-    # compute delay in seconds from base_delay_ms divided by multiplier
-    delay = max(0.001, (base_delay_ms / max(1, multiplier)) / 1000.0)
+    # compute delay in seconds from base_delay_ms divided by speed slider value
+    delay = max(0.001, (base_delay_ms / max(1, speed)) / 1000.0)
     # iterate from current index
     for i in range(st.session_state.idx, len(st.session_state.frames)):
         # if playing was switched off via UI before starting this iteration, break
