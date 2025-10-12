@@ -13,7 +13,7 @@ This repository contains simple algorithm implementations (sorting, search, path
 ## Features 🚀
 
 - Lightweight algorithm implementations with generator-based frame output for visualization.
-- Streamlit-based web demo (`web_app.py`) for interactive playback.
+- Streamlit-based web demo (`main.py`) for interactive playback.
 - Example CLI/demo scripts under `examples/`.
 - Small test suite for core algorithms.
 - Beginner-friendly and Hacktoberfest ready! 🎃
@@ -48,7 +48,7 @@ pip install -r requirements.txt
 ### Run Streamlit visualizer:
 
 ```bash
-streamlit run web_app.py
+streamlit run main.py
 ```
 
 - Sidebar options:
@@ -82,7 +82,7 @@ python examples/run_sort_demo.py
 
 ## Project Layout 🗂️
 
-- `web_app.py` — Streamlit UI logic
+- `main.py` — Streamlit UI logic
 - `algorithms/` — generator-based algorithm implementations
 - `visualizers/` — helper visualizers
 - `examples/` — demo scripts
@@ -103,7 +103,7 @@ Each algorithm yields frames as dictionaries:
 }
 ```
 
-Streamlit (`web_app.py`) renders these frames as bar charts. Playback speed uses `st.session_state.multiplier`.
+Streamlit (`main.py`) renders these frames as bar charts. Playback speed uses `st.session_state.multiplier`.
 
 ---
 
