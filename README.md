@@ -2,7 +2,7 @@
 
 ![Banner](https://user-images.githubusercontent.com/yourusername/banner.png)
 
-Minimal, extensible Python Algorithm Visualizer with small demos and a Streamlit web UI.
+Minimal , extensible Python Algorithm Visualizer with small demos and a Streamlit web UI.
 
 This repository contains simple algorithm implementations (sorting, search, pathfinding) plus small visualizers and example scripts you can run locally. It's designed for **learning, teaching, and experimentation**, now celebrating **Hacktoberfest 2025!** 🎉
 
