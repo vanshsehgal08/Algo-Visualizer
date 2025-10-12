@@ -34,7 +34,7 @@ def draw_state_fig(state, highlight=(), info=""):
         if highlight:
             for idx in (highlight if isinstance(highlight, (list, tuple)) else [highlight]):
                 if isinstance(idx, int) and 0 <= idx < len(bars):
-                    bars[idx].set_color('#ff7f0e')
+                    bars[idx].set_color('#ee994f')
         ax.set_xlabel('Index')
         ax.set_ylabel('Value')
         ax.set_xticks(range(len(state)))
@@ -72,7 +72,7 @@ with st.sidebar:
         target = st.number_input("Target value", value=arr[0] if arr else 0)
 
     # Speed control: base delay (ms) controls baseline speed; multiplier increases playback speed
-    base_delay_ms = 160
+    base_delay_ms = 100
     # persistent multiplier stored in session_state so changes persist across re-runs
     if 'multiplier' not in st.session_state:
         st.session_state.multiplier = 2
