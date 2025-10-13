@@ -56,12 +56,41 @@ st.title("Algorithm Visualizer — Web Demo")
 # Sidebar controls
 with st.sidebar:
     st.header("Controls")
-    algo_name = st.selectbox("Algorithm", list(ALGOS.keys()) + ["Binary Search"])
-    st.markdown("**Array input (required)**")
-    arr_text = st.text_input("Enter numbers separated by commas", "5,2,4,1,3")
-    # Derive array strictly from user input (no randomization)
+    
+    # Form for array input and visualization trigger
+    with st.form("visualization_form"):
+        algo_name = st.selectbox("Algorithm", list(ALGOS.keys()) + ["Binary Search"])
+        st.markdown("**Array input (required)**")
+        arr_text = st.text_input("Enter numbers separated by commas", "5,2,4,1,3")
+        
+        if algo_name == "Binary Search":
+            target = st.number_input("Target value", value=5)
+        
+        submitted = st.form_submit_button("Visualize!")
+        
+        # Process form submission
+        if submitted:
+            # Derive array strictly from user input (no randomization)
+            try:
+                arr = [int(x.strip()) for x in arr_text.split(",") if x.strip()!='']
+                if not arr:
+                    st.error("Please enter at least one number")
+                else:
+                    # Build frames list from generator so we can step/play
+                    if algo_name == "Binary Search":
+                        st.session_state.frames = list(binary_search(sorted(arr), int(target)))
+                    else:
+                        st.session_state.frames = list(ALGOS[algo_name](arr))
+                    st.session_state.idx = 0
+                    st.session_state.playing = False
+                    st.success(f"Generated {len(st.session_state.frames)} frames!")
+            except Exception:
+                st.error("Invalid array - use comma separated integers")
+    
+    # Display array info outside form
     try:
         arr = [int(x.strip()) for x in arr_text.split(",") if x.strip()!='']
+        st.write(f"Array size: {len(arr)}")
     except Exception:
         st.error("Invalid array - use comma separated integers")
         arr = []
@@ -106,19 +135,6 @@ with st.sidebar:
     if 'idx' not in st.session_state:
         st.session_state.idx = 0
 
-    if st.button("Generate frames"):
-        # Build frames list from generator so we can step/play
-        if not arr:
-            st.warning("Provide a valid array first.")
-            st.session_state.frames = []
-        else:
-            if algo_name == "Binary Search":
-                st.session_state.frames = list(binary_search(sorted(arr), int(target)))
-            else:
-                st.session_state.frames = list(ALGOS[algo_name](arr))
-        st.session_state.idx = 0
-        st.session_state.playing = False
-
     # Clean play/pause/step buttons
     c1, c2, c3 = st.columns([1,1,1])
     with c1:
@@ -156,8 +172,8 @@ if st.session_state.frames:
 # Note: this is a simple approach that does not support pausing mid-block reliably
 # because Streamlit processes events between runs. It still provides Start/Stop/Step.
 if st.session_state.playing and st.session_state.frames:
-    # compute delay in seconds from base_delay_ms divided by multiplier
-    delay = max(0.001, (base_delay_ms / max(1, multiplier)) / 1000.0)
+    # compute delay in seconds from base_delay_ms divided by speed slider value
+    delay = max(0.001, (base_delay_ms / max(1, speed)) / 1000.0)
     # iterate from current index
     for i in range(st.session_state.idx, len(st.session_state.frames)):
         # if playing was switched off via UI before starting this iteration, break

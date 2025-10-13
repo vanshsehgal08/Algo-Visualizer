@@ -13,7 +13,7 @@ This repository contains simple algorithm implementations (sorting, search, path
 ## Features 🚀
 
 - Lightweight algorithm implementations with generator-based frame output for visualization.
-- Streamlit-based web demo (`web_app.py`) for interactive playback.
+- Streamlit-based web demo (`main.py`) for interactive playback.
 - Example CLI/demo scripts under `examples/`.
 - Small test suite for core algorithms.
 - Beginner-friendly and Hacktoberfest ready! 🎃
@@ -48,14 +48,14 @@ pip install -r requirements.txt
 ### Run Streamlit visualizer:
 
 ```bash
-streamlit run web_app.py
+streamlit run main.py
 ```
 
 - Sidebar options:
   - Select an algorithm (Bubble Sort, Insertion Sort, Selection Sort, Binary Search)
-  - Enter an array (e.g., `5,2,4,1,3`)
-  - Generate frames, use Play / Pause / Step controls
-  - Adjust playback speed (multiplier persists across runs)
+  - Enter an array (e.g., `5,2,4,1,3`) and click "Visualize!" or press Enter
+  - Use Play / Pause / Step controls for animation playback
+  - Adjust playback speed with the slider (1-10x range)
 
 ### Run CLI demo (non-Streamlit):
 
@@ -82,7 +82,7 @@ python examples/run_sort_demo.py
 
 ## Project Layout 🗂️
 
-- `web_app.py` — Streamlit UI logic
+- `main.py` — Streamlit UI logic
 - `algorithms/` — generator-based algorithm implementations
 - `visualizers/` — helper visualizers
 - `examples/` — demo scripts
@@ -103,7 +103,7 @@ Each algorithm yields frames as dictionaries:
 }
 ```
 
-Streamlit (`web_app.py`) renders these frames as bar charts. Playback speed uses `st.session_state.multiplier`.
+Streamlit (`main.py`) renders these frames as bar charts. Playback speed uses a slider control.
 
 ---
 
