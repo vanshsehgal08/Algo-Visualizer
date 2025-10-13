@@ -57,132 +57,224 @@ st.title("Algorithm Visualizer — Web Demo")
 with st.sidebar:
     st.header("Controls")
     
-    # Form for array input and visualization trigger
+    # Algorithm and input configuration form
+    st.subheader("Configuration")
     with st.form("visualization_form"):
-        algo_name = st.selectbox("Algorithm", list(ALGOS.keys()) + ["Binary Search"])
-        st.markdown("**Array input (required)**")
-        arr_text = st.text_input("Enter numbers separated by commas", "5,2,4,1,3")
+        algo_name = st.selectbox(
+            "🔧 Select Algorithm", 
+            list(ALGOS.keys()) + ["Binary Search"],
+            help="Choose the algorithm you want to visualize"
+        )
         
+        st.markdown("**📝 Array Input**")
+        arr_text = st.text_input(
+            "Enter numbers separated by commas", 
+            value="5,2,4,1,3",
+            placeholder="e.g., 5,2,4,1,3",
+            help="Enter integers separated by commas"
+        )
+        
+        # Additional input for binary search
+        target = None
         if algo_name == "Binary Search":
-            target = st.number_input("Target value", value=5)
+            target = st.number_input(
+                "🎯 Target value to search for", 
+                value=5,
+                help="The number you want to find in the array"
+            )
         
-        submitted = st.form_submit_button("Visualize!")
+        # Submit button with better styling
+        submitted = st.form_submit_button("🚀 Generate Visualization", use_container_width=True)
         
-        # Process form submission
+        # Process form submission with better error handling
         if submitted:
-            # Derive array strictly from user input (no randomization)
             try:
-                arr = [int(x.strip()) for x in arr_text.split(",") if x.strip()!='']
+                # Parse and validate array input
+                arr = [int(x.strip()) for x in arr_text.split(",") if x.strip() != '']
+                
                 if not arr:
-                    st.error("Please enter at least one number")
+                    st.error("❌ Please enter at least one number")
+                elif len(arr) > 50:
+                    st.error("❌ Array too large! Please use 50 or fewer elements")
                 else:
-                    # Build frames list from generator so we can step/play
-                    if algo_name == "Binary Search":
-                        st.session_state.frames = list(binary_search(sorted(arr), int(target)))
-                    else:
-                        st.session_state.frames = list(ALGOS[algo_name](arr))
-                    st.session_state.idx = 0
-                    st.session_state.playing = False
-                    st.success(f"Generated {len(st.session_state.frames)} frames!")
-            except Exception:
-                st.error("Invalid array - use comma separated integers")
+                    # Generate algorithm frames
+                    with st.spinner(f"Generating {algo_name} visualization..."):
+                        if algo_name == "Binary Search":
+                            # Sort array for binary search
+                            sorted_arr = sorted(arr)
+                            st.info(f"🔄 Array sorted for binary search: {sorted_arr}")
+                            st.session_state.frames = list(binary_search(sorted_arr, int(target)))
+                        else:
+                            st.session_state.frames = list(ALGOS[algo_name](arr.copy()))
+                        
+                        # Reset playback state
+                        st.session_state.idx = 0
+                        st.session_state.playing = False
+                        
+                        st.success(f"✅ Generated {len(st.session_state.frames)} animation frames!")
+                        
+            except ValueError:
+                st.error("❌ Invalid input! Please enter only integers separated by commas")
+            except Exception as e:
+                st.error(f"❌ An error occurred: {str(e)}")
     
     # Display array info outside form
     try:
-        arr = [int(x.strip()) for x in arr_text.split(",") if x.strip()!='']
-        st.write(f"Array size: {len(arr)}")
+        arr = [int(x.strip()) for x in arr_text.split(",") if x.strip() != '']
+        if arr:
+            st.info(f"📊 Array size: **{len(arr)}**")
+            st.write(f"Array preview: `{arr}`")
+        else:
+            st.warning("⚠️ Array is empty")
     except Exception:
-        st.error("Invalid array - use comma separated integers")
+        st.error("❌ Invalid array format - use comma separated integers")
         arr = []
-    # keep UI simple: array size is derived from number of inputs
-    st.write(f"Array size: {len(arr)}")
 
-    if algo_name == "Binary Search":
-        target = st.number_input("Target value", value=arr[0] if arr else 0)
-
-    # Speed control: base delay (ms) controls baseline speed; multiplier increases playback speed
-    base_delay_ms = 100
-    # persistent multiplier stored in session_state so changes persist across re-runs
+    # Speed control configuration
+    st.subheader("Playback Speed")
+    base_delay_ms = 500  # Base delay in milliseconds
+    
+    # Initialize speed multiplier in session state
     if 'multiplier' not in st.session_state:
-        st.session_state.multiplier = 2
-
-    col_a, col_b, col_c = st.columns([1,1,2])
-    with col_a:
-        if st.button("Speed -"):
-            # halve the multiplier but keep at least 1
-            st.session_state.multiplier = max(1, st.session_state.multiplier // 2)
-    with col_b:
-        if st.button("Speed +"):
-            # double the multiplier each click (user requested "increase speed more, every time I select")
-            st.session_state.multiplier = st.session_state.multiplier * 4
-    with col_c:
-        st.write("Current multiplier:", f"{st.session_state.multiplier}x")
-
-    # provide a quick presets row for convenience
-    preset_cols = st.columns([1,1,1,1])
-    presets = [1,2,4,8]
-    for pc, val in zip(preset_cols, presets):
-        with pc:
-            if st.button(f"{val}x"):
-                st.session_state.multiplier = val
-    multiplier = st.session_state.multiplier
+        st.session_state.multiplier = 1
+    
+    # Speed adjustment buttons
+    speed_cols = st.columns([1, 1])
+    with speed_cols[0]:
+        if st.button("🐌 Slower"):
+            st.session_state.multiplier = max(0.25, st.session_state.multiplier / 2)
+    with speed_cols[1]:
+        if st.button("🚀 Faster"):
+            st.session_state.multiplier = min(16, st.session_state.multiplier * 2)
+    
+    # Current speed display
+    st.write(f"**Speed:** {st.session_state.multiplier}x")
+    
+    # Speed presets
+    st.write("**Quick Presets:**")
+    preset_cols = st.columns(4)
+    presets = [0.5, 1, 2, 4]
+    for i, (col, speed_val) in enumerate(zip(preset_cols, presets)):
+        with col:
+            if st.button(f"{speed_val}x", key=f"preset_{i}"):
+                st.session_state.multiplier = speed_val
     st.markdown("---")
-    st.write("Playback")
+    
+    # Initialize session state variables
     if 'playing' not in st.session_state:
         st.session_state.playing = False
     if 'frames' not in st.session_state:
         st.session_state.frames = []
     if 'idx' not in st.session_state:
         st.session_state.idx = 0
-
-    # Clean play/pause/step buttons
-    c1, c2, c3 = st.columns([1,1,1])
-    with c1:
-        if st.button("Play ▶️"):
+    
+    st.subheader("Animation Controls")
+    
+    # Animation status indicator
+    if st.session_state.frames:
+        status = "🔴 Playing..." if st.session_state.playing else "⏸️ Paused"
+        st.markdown(f"**Status:** {status}")
+    
+    # Playback control buttons
+    control_cols = st.columns(4)
+    with control_cols[0]:
+        play_disabled = not st.session_state.frames or st.session_state.idx >= len(st.session_state.frames) - 1
+        if st.button("▶️ Play", disabled=play_disabled):
             st.session_state.playing = True
-    with c2:
-        if st.button("Pause ⏸️"):
+    with control_cols[1]:
+        if st.button("⏸️ Pause"):
             st.session_state.playing = False
-    with c3:
-        if st.button("Step ⏭️"):
+    with control_cols[2]:
+        step_disabled = not st.session_state.frames or st.session_state.idx >= len(st.session_state.frames) - 1
+        if st.button("⏭️ Step", disabled=step_disabled):
             st.session_state.playing = False
-            st.session_state.idx = min(st.session_state.idx + 1, max(len(st.session_state.frames) - 1, 0))
+            max_idx = max(len(st.session_state.frames) - 1, 0)
+            st.session_state.idx = min(st.session_state.idx + 1, max_idx)
+    with control_cols[3]:
+        if st.button("🔄 Reset", disabled=not st.session_state.frames):
+            st.session_state.idx = 0
+            st.session_state.playing = False
 
-    if st.button("Reset"):
-        st.session_state.idx = 0
-        st.session_state.playing = False
+    # Progress indicator (moved to main area)
+    if not st.session_state.frames:
+        st.info("🎬 Generate visualization frames to start animation")
 
-    st.write("Current frame:", st.session_state.idx, "/", max(len(st.session_state.frames) - 1, 0))
+# Main visualization display area
+st.header("Visualization")
 
-# Main display
-placeholder = st.empty()
+# Progress bar container (above the graph)
+progress_container = st.container()
+graph_container = st.container()
+
+def update_progress_bar():
+    """Update the progress bar with current frame information."""
+    if st.session_state.frames:
+        total_frames = len(st.session_state.frames)
+        current_frame = st.session_state.idx + 1
+        progress_value = st.session_state.idx / max(total_frames - 1, 1)
+        percentage = int(progress_value * 100)
+        
+        with progress_container:
+            # Progress header with percentage
+            st.markdown(f"### 📊 Progress: {percentage}%")
+            
+            # Progress bar with frame counter
+            prog_col1, prog_col2 = st.columns([5, 1])
+            with prog_col1:
+                st.progress(progress_value)
+            with prog_col2:
+                st.metric("Frame", f"{current_frame}/{total_frames}")
+            
+            # Current step information
+            if st.session_state.frames and 0 <= st.session_state.idx < len(st.session_state.frames):
+                current_info = st.session_state.frames[st.session_state.idx].get('info', 'Algorithm Step')
+                st.info(f"� **Current Step:** {current_info}")
+            
+            st.markdown("---")  # Visual separator
 
 def render_frame_at(i: int):
-    if 0 <= i < len(st.session_state.frames):
-        frame = st.session_state.frames[i]
-        fig = draw_state_fig(frame.get('state', []), frame.get('highlight', ()), frame.get('info', ''))
-        placeholder.pyplot(fig)
-        plt.close(fig)
+    """Render the visualization frame at the given index."""
+    # Update progress bar first
+    update_progress_bar()
+    
+    if st.session_state.frames and 0 <= i < len(st.session_state.frames):
+        try:
+            frame = st.session_state.frames[i]
+            fig = draw_state_fig(
+                frame.get('state', []), 
+                frame.get('highlight', ()), 
+                frame.get('info', 'Algorithm Step')
+            )
+            with graph_container:
+                st.pyplot(fig)
+            plt.close(fig)
+        except Exception as e:
+            with graph_container:
+                st.error(f"Error rendering frame: {str(e)}")
+    else:
+        with progress_container:
+            st.info("🎯 Select an algorithm and click 'Visualize!' to see the animation")
 
-# If frames are present, show current frame
-if st.session_state.frames:
-    render_frame_at(st.session_state.idx)
+# Display current frame or welcome message
+render_frame_at(st.session_state.idx)
 
-# Playback loop (blocking): iterates frames while the playing flag is True.
-# Note: this is a simple approach that does not support pausing mid-block reliably
-# because Streamlit processes events between runs. It still provides Start/Stop/Step.
+# Auto-advancing playback with smooth progress updates
 if st.session_state.playing and st.session_state.frames:
-    # compute delay in seconds from base_delay_ms divided by speed slider value
-    delay = max(0.001, (base_delay_ms / max(1, speed)) / 1000.0)
-    # iterate from current index
-    for i in range(st.session_state.idx, len(st.session_state.frames)):
-        # if playing was switched off via UI before starting this iteration, break
-        if not st.session_state.playing:
-            break
-        render_frame_at(i)
-        st.session_state.idx = i + 1
+    # Compute delay in seconds
+    delay = max(0.1, base_delay_ms / (1000.0 * st.session_state.multiplier))
+    
+    # Auto-advance to next frame
+    if st.session_state.idx < len(st.session_state.frames) - 1:
+        # Wait for the specified delay
         time.sleep(delay)
-    st.session_state.playing = False
-    if st.session_state.idx >= len(st.session_state.frames):
-        st.success("Done")
+        # Advance to next frame
+        st.session_state.idx += 1
+        # Trigger rerun to update display
+        st.rerun()
+    else:
+        # Animation completed
+        st.session_state.playing = False
+        st.session_state.idx = len(st.session_state.frames) - 1
+        with st.sidebar:
+            st.success("🎉 Animation Complete!")
 
