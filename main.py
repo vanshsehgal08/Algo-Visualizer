@@ -15,7 +15,7 @@ ALGOS = {
 }
 
 
-def draw_state_fig(state, highlight=(), info=""):
+def draw_state_fig(state, highlight=(), info="", bar_color="#4C78A8", highlight_color="#EE994F"):
     """Draws a bar chart with axis labels, title, and highlight indices."""
     plt.style.use('seaborn-v0_8-darkgrid')
     fig, ax = plt.subplots(figsize=(9, 4))
@@ -26,15 +26,13 @@ def draw_state_fig(state, highlight=(), info=""):
         ax.set_xticks([])
         ax.set_yticks([])
     else:
-        # colored bars with a subtle gradient and highlighted indices
-        cmap = plt.get_cmap('Blues')
-        n = len(state)
-        colors = [cmap(0.3 + 0.7 * (i / max(1, n - 1))) for i in range(n)]
-        bars = ax.bar(range(n), state, color=colors, edgecolor='black')
+        # Updated colored bars: Replaced the gradient colors with a uniform color based on bar_color:
+        bars = ax.bar(range(len(state)), state, color=bar_color, edgecolor='black')
+
         if highlight:
             for idx in (highlight if isinstance(highlight, (list, tuple)) else [highlight]):
                 if isinstance(idx, int) and 0 <= idx < len(bars):
-                    bars[idx].set_color('#ee994f')
+                    bars[idx].set_color(highlight_color)
         ax.set_xlabel('Index')
         ax.set_ylabel('Value')
         ax.set_xticks(range(len(state)))
@@ -167,8 +165,17 @@ with st.sidebar:
         st.session_state.frames = []
     if 'idx' not in st.session_state:
         st.session_state.idx = 0
-    
-    st.subheader("Animation Controls")
+
+   # Personalization
+    st.subheader("Colors")
+    if "bar_color" not in st.session_state:
+        st.session_state.bar_color = "#4C78A8"  # default bars
+    if "highlight_color" not in st.session_state:
+        st.session_state.highlight_color = "#EE994F"  # default highlight
+
+    st.session_state.bar_color = st.color_picker("Choose bar color", value=st.session_state.bar_color)
+    st.session_state.highlight_color = st.color_picker("Choose highlight color", value=st.session_state.highlight_color)
+
     
     # Animation status indicator
     if st.session_state.frames:
@@ -241,10 +248,13 @@ def render_frame_at(i: int):
         try:
             frame = st.session_state.frames[i]
             fig = draw_state_fig(
-                frame.get('state', []), 
-                frame.get('highlight', ()), 
-                frame.get('info', 'Algorithm Step')
+                frame.get('state', []),
+                frame.get('highlight', ()),
+                frame.get('info', 'Algorithm Step'),
+                bar_color=st.session_state.get("bar_color", "#4C78A8"),
+                highlight_color=st.session_state.get("highlight_color", "#EE994F"),
             )
+
             with graph_container:
                 st.pyplot(fig)
             plt.close(fig)
