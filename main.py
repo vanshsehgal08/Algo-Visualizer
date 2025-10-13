@@ -277,4 +277,4 @@ if st.session_state.playing and st.session_state.frames:
         st.session_state.idx = len(st.session_state.frames) - 1
         with st.sidebar:
             st.success("🎉 Animation Complete!")
-
+        st.toast("✅ Array sorted successfully! 🎉")
